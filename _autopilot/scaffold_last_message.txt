@@ -1,0 +1,24 @@
+Created a standalone repo in `/home/alireza/research-autopilot/generated_projects/stackdup-dual-encoder-retrieval` implementing the plan’s end-to-end pipeline (without running big jobs by default):
+
+- **PEP 668-safe setup**: `scripts/bootstrap_venv.sh` creates `.venv` via `python3 -m venv --without-pip` + downloads `get-pip.py`, then installs pinned deps using `.venv/bin/pip` only.
+- **Makefile** targets: `setup`, `data`, `train`, `eval`, `report`, `all` (defaults to fast smoke configs).
+- **Data**:
+  - Smoke dataset generator: `python -m stackdup.data.synthetic --config configs/smoke_data.yaml`
+  - Real dump pipeline CLIs (implemented): `stackdup.data.download` (Archive.org metadata MD5/size verification), `stackdup.data.extract`, `stackdup.data.build_pairs` (stream-parse XML to SQLite), `stackdup.data.split` (time split to JSONL).
+- **Baselines**:
+  - TF-IDF + cosine: `stackdup.baselines.tfidf_eval`
+  - BM25 (pure Python, smoke-scale): `stackdup.baselines.bm25_eval`
+  - Optional Lucene BM25 via Pyserini: `stackdup.baselines.pyserini_index` / `stackdup.baselines.pyserini_eval` (+ `requirements-pyserini.txt`)
+- **Bi-encoder training (PyTorch)** with reproducibility controls: `stackdup.train.biencoder`
+  - **Baseline (as in plan)**: in-batch negatives + **BM25-mined hard negatives** via `configs/smoke_baseline.yaml`
+  - **Ablation (exactly as in plan)**: **no hard negatives** (in-batch only) via `configs/smoke_no_hardneg.yaml`
+- **Evaluation + reporting**:
+  - Bi-encoder retrieval eval (FAISS if available, else brute force): `stackdup.eval.retrieval`
+  - Produces `artifacts/results.json` and `artifacts/report.md` via `make eval` + `make report`
+
+Run the smoke pipeline end-to-end:
+```bash
+make all
+```
+
+Key experiment mapping is documented in `EXPERIMENTS.md`.

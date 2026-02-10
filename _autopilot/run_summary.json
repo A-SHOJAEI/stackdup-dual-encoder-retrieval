@@ -1,0 +1,118 @@
+{
+  "comparisons": {
+    "biencoder_baseline_minus_no_hardneg": {
+      "mrr@10": -0.0030555555555555544,
+      "n_eval": 0.0,
+      "ndcg@10": 0.0013587881185992447,
+      "recall@1": -0.008333333333333333,
+      "recall@10": 0.01666666666666667,
+      "recall@5": 0.0,
+      "recall@50": -0.033333333333333354
+    }
+  },
+  "experiments": [
+    {
+      "kind": "baseline",
+      "metrics": {
+        "mrr@10": 1.0,
+        "n_eval": 120.0,
+        "ndcg@10": 1.0,
+        "recall@1": 1.0,
+        "recall@10": 1.0,
+        "recall@5": 1.0,
+        "recall@50": 1.0
+      },
+      "name": "tfidf_cosine",
+      "timing": {
+        "n_queries": 120,
+        "rank_seconds": 0.040036201011389494,
+        "topk": 50
+      }
+    },
+    {
+      "kind": "baseline",
+      "metrics": {
+        "mrr@10": 1.0,
+        "n_eval": 120.0,
+        "ndcg@10": 1.0,
+        "recall@1": 1.0,
+        "recall@10": 1.0,
+        "recall@5": 1.0,
+        "recall@50": 1.0
+      },
+      "name": "bm25_python",
+      "notes": "This is a small-scale BM25 implementation for smoke runs. For the plan's Lucene BM25, use the optional Pyserini baseline.",
+      "timing": {
+        "n_queries": 120,
+        "rank_seconds": 0.1940327340271324,
+        "topk": 50
+      }
+    },
+    {
+      "checkpoint": "runs/smoke_biencoder_baseline/best.pt",
+      "checkpoint_meta": {
+        "meta": {
+          "epoch": 0,
+          "val_loss": 2.5415396690368652
+        },
+        "step": 2
+      },
+      "config_path": "configs/smoke_baseline.yaml",
+      "device": "cuda",
+      "kind": "biencoder",
+      "metrics": {
+        "mrr@10": 0.01007936507936508,
+        "n_eval": 120.0,
+        "ndcg@10": 0.019045439449026088,
+        "recall@1": 0.0,
+        "recall@10": 0.05,
+        "recall@5": 0.016666666666666666,
+        "recall@50": 0.15833333333333333
+      },
+      "name": "smoke_biencoder_baseline",
+      "timing": {
+        "encode_corpus_seconds": 0.445488374971319,
+        "encode_queries_seconds": 0.013950699009001255,
+        "n_corpus": 300,
+        "n_queries": 120,
+        "rank_kind": "faiss",
+        "rank_seconds": 0.018167422036640346,
+        "topk": 50
+      }
+    },
+    {
+      "checkpoint": "runs/smoke_biencoder_no_hardneg/best.pt",
+      "checkpoint_meta": {
+        "meta": {
+          "epoch": 0,
+          "val_loss": 2.541539510091146
+        },
+        "step": 4
+      },
+      "config_path": "configs/smoke_no_hardneg.yaml",
+      "device": "cuda",
+      "kind": "biencoder",
+      "metrics": {
+        "mrr@10": 0.013134920634920635,
+        "n_eval": 120.0,
+        "ndcg@10": 0.017686651330426843,
+        "recall@1": 0.008333333333333333,
+        "recall@10": 0.03333333333333333,
+        "recall@5": 0.016666666666666666,
+        "recall@50": 0.19166666666666668
+      },
+      "name": "smoke_biencoder_no_hardneg",
+      "timing": {
+        "encode_corpus_seconds": 0.4431670000194572,
+        "encode_queries_seconds": 0.014312992978375405,
+        "n_corpus": 300,
+        "n_queries": 120,
+        "rank_kind": "faiss",
+        "rank_seconds": 0.018003067991230637,
+        "topk": 50
+      }
+    }
+  ],
+  "_autopilot_runtime_seconds": 75.55,
+  "_autopilot_ran_at_utc": "2026-02-10 08:12:39 UTC"
+}

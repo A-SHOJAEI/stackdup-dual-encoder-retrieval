@@ -1,0 +1,71 @@
+{
+  "repo_name": "stackdup-dual-encoder-retrieval",
+  "title": "Hard-Negative Mined Dual-Encoder Retrieval for Duplicate Question Detection on the Stack Overflow Data Dump",
+  "one_liner": "Train a production-grade bi-encoder retriever that finds duplicate Stack Overflow questions at corpus scale, and quantify gains from hard-negative mining and objective/architecture ablations.",
+  "research_question": "How much do (1) hard-negative mining strategy, (2) contrastive objective details (temperature, in-batch vs. mined negatives), and (3) input/pooling design contribute to duplicate-question retrieval quality at million-scale, compared to sparse BM25 baselines under time-based splits?",
+  "dataset": {
+    "name": "Stack Exchange Data Dump (Stack Overflow: Posts + PostLinks)",
+    "urls": [
+      "https://archive.org/download/stackexchange/stackoverflow.com-Posts.7z",
+      "https://archive.org/download/stackexchange/stackoverflow.com-PostLinks.7z",
+      "https://archive.org/download/stackexchange/readme.txt"
+    ],
+    "license": "CC BY-SA 4.0 (Stack Overflow user contributions; distributed via Stack Exchange data dump)",
+    "approx_size_gb": 25,
+    "ingestion_notes": "Automatically download .7z files from archive.org, extract, and stream-parse XML with an iterative parser (no full in-memory load). Keep only questions (PostTypeId=1) and build positive pairs from PostLinks with LinkTypeId=3 (duplicates). Create a time-based split using CreationDate to avoid leakage; optionally cap to a documented subset (e.g., 2-5M questions, >=1M duplicate edges if available) while keeping the pipeline identical."
+  },
+  "method": {
+    "model": "PyTorch dual-encoder (bi-encoder) based on a pretrained Transformer (e.g., DeBERTa-v3-base or MPNet-base), trained with contrastive InfoNCE using in-batch negatives plus periodic hard-negative mining (BM25 or previous-checkpoint ANN) and FAISS for corpus-scale retrieval evaluation.",
+    "baseline": "Sparse retrieval baseline: BM25 (Lucene via Pyserini) over title+body; report retrieval metrics on the same candidate corpus and splits. Secondary baseline: TF-IDF + cosine (scikit-learn) for a lightweight sparse comparator.",
+    "ablations": [
+      "No hard negatives (in-batch negatives only).",
+      "Hard negatives from BM25 vs. ANN (FAISS) vs. random negatives (same tag/time window).",
+      "Input text: title-only vs. title+body (truncated) vs. title+first N tokens of body; include/omit code blocks stripping.",
+      "Pooling: [CLS] vs. mean pooling; with/without embedding normalization.",
+      "Objective: temperature sweep; cross-entropy over in-batch logits vs. margin-based triplet loss.",
+      "Encoder size: base vs. small (Distil* equivalent) to quantify quality/latency tradeoff."
+    ],
+    "metrics": [
+      "Recall@{1,5,10,50} on corpus-scale retrieval (positive = known duplicate target).",
+      "MRR@10 and nDCG@10.",
+      "Inference throughput (queries/sec) and index build time; GPU/CPU utilization logs for reproducibility."
+    ]
+  },
+  "compute": {
+    "gpus": 2,
+    "expected_hours": 24
+  },
+  "risks": [
+    "Download/extraction size and disk throughput can dominate wall time; plan for tens of GB compressed and much larger extracted XML.",
+    "Duplicate links are noisy/incomplete; evaluation depends on observed links (false negatives exist).",
+    "Leakage risk if splitting is not strictly time-based and if near-duplicates appear across splits; mitigate with CreationDate split and optional near-duplicate text filtering.",
+    "Corpus-scale BM25 indexing and FAISS embedding indexing require careful memory/disk planning and robust incremental pipelines."
+  ],
+  "execution_steps": [
+    "Create env and install deps (PyTorch, transformers, sentencepiece, faiss-gpu, pyserini, lxml, orjson, hydra/omegaconf, wandb or MLflow optional).",
+    "Run `python -m data.download --dataset stackoverflow --out data/raw` to fetch from archive.org URLs and verify checksums/size.",
+    "Run `python -m data.extract --in data/raw --out data/extracted` to 7z-extract with resumability.",
+    "Run `python -m data.build_pairs --posts data/extracted/Posts.xml --links data/extracted/PostLinks.xml --out data/processed` to stream-parse, clean HTML, strip/normalize code blocks, and write sharded parquet/jsonl with (qid, text, creation_date) and duplicate edges.",
+    "Run `python -m data.split --in data/processed --strategy time --train_end YYYY-MM-DD --val_end YYYY-MM-DD --out data/splits` to create time-based train/val/test and a fixed candidate corpus for retrieval.",
+    "Baseline: `python -m baselines.bm25_index --corpus data/splits/corpus.jsonl --out indices/bm25` then `python -m baselines.bm25_eval --index indices/bm25 --queries data/splits/test_queries.jsonl --qrels data/splits/test_qrels.jsonl`.",
+    "Train: `torchrun --nproc_per_node=2 python -m train.biencoder --config configs/biencoder.yaml` (mixed precision, gradient accumulation, periodic checkpointing).",
+    "Hard-negative mining loop: `python -m mining.mine_negatives --mode bm25|ann --k 50 --out data/mined_negatives` then resume training with mined negatives; repeat 1-2 rounds.",
+    "Evaluate: `python -m eval.retrieval --checkpoint runs/.../best.pt --corpus data/splits/corpus.jsonl --queries data/splits/test_queries.jsonl --qrels data/splits/test_qrels.jsonl --faiss_gpu` and export a consolidated metrics report with confidence intervals via bootstrap.",
+    "Run ablations by switching config flags; produce a final table and plots (quality vs. latency/compute) and a short technical report documenting methodology, leakage controls, and failure cases."
+  ],
+  "generated_at_utc": "2026-02-10 07:57:09 UTC",
+  "hardware": {
+    "cpu_cores": 24,
+    "cpu_threads": 48,
+    "ram_gb": 251.59,
+    "gpu_count": 2,
+    "gpu_names": [
+      "NVIDIA GeForce RTX 3090",
+      "NVIDIA GeForce RTX 3090"
+    ],
+    "gpu_vram_gb": [
+      24.0,
+      24.0
+    ]
+  }
+}

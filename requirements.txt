@@ -1,0 +1,23 @@
+# Core
+numpy==1.26.4
+scipy==1.12.0
+tqdm==4.66.4
+pyyaml==6.0.2
+requests==2.32.3
+
+# Data parsing/cleaning
+lxml==5.2.2
+beautifulsoup4==4.12.3
+
+# Baselines + metrics
+scikit-learn==1.5.1
+rank-bm25==0.2.2
+
+# Training / modeling
+torch==2.4.1
+transformers==4.44.2
+accelerate==0.33.0
+sentencepiece==0.2.0
+
+# Retrieval indexing (CPU). (GPU FAISS is typically conda; optional.)
+faiss-cpu==1.8.0.post1

@@ -1,0 +1,21 @@
+# Full dataset pipeline configuration (implemented; not run by default).
+dataset:
+  name: stackoverflow
+  out_dir: data
+  raw_dir: data/raw
+  extracted_dir: data/extracted
+  processed_dir: data/processed
+  splits_dir: data/splits
+  urls:
+    - "https://archive.org/download/stackexchange/stackoverflow.com-Posts.7z"
+    - "https://archive.org/download/stackexchange/stackoverflow.com-PostLinks.7z"
+    - "https://archive.org/download/stackexchange/readme.txt"
+
+split:
+  train_end: "2018-01-01"
+  val_end: "2019-01-01"
+
+build:
+  include_body: true
+  strip_code_blocks: true
+  max_body_chars: 20000

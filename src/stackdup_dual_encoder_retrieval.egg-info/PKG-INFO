@@ -1,0 +1,119 @@
+Metadata-Version: 2.1
+Name: stackdup-dual-encoder-retrieval
+Version: 0.1.0
+Summary: Hard-negative mined dual-encoder retrieval for Stack Overflow duplicate question detection.
+License: MIT License
+        
+        Copyright (c) 2026
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# stackdup-dual-encoder-retrieval
+
+Hard-negative mined dual-encoder retrieval for duplicate question detection, with a reproducible smoke pipeline and a scalable (full) pipeline for the Stack Overflow Stack Exchange data dump.
+
+This repository implements:
+- Data download + verification (Archive.org metadata hashes when available), extraction, and stream parsing for Stack Overflow `Posts.xml` + `PostLinks.xml`.
+- Sparse baselines: TF-IDF + cosine (lightweight) and a small-scale BM25 baseline (pure Python). A Pyserini/Lucene BM25 baseline is included as an optional extra.
+- A PyTorch bi-encoder trained with InfoNCE using in-batch negatives and optional mined hard negatives.
+- Evaluation that writes machine-readable `artifacts/results.json` and a human report `artifacts/report.md`.
+
+## Quickstart (Smoke)
+
+The default `make all` runs a fast, synthetic smoke experiment:
+- Builds a tiny synthetic duplicate-retrieval dataset.
+- Runs sparse baselines (TF-IDF and BM25).
+- Trains two dual-encoder runs:
+  - **Baseline**: in-batch negatives + BM25-mined hard negatives (as described in the plan).
+  - **Ablation**: **no hard negatives** (in-batch negatives only), exactly as described in the plan.
+- Evaluates both runs and produces:
+  - `artifacts/results.json`
+  - `artifacts/report.md`
+
+```bash
+make all
+```
+
+## Full Stack Overflow Data Dump Pipeline (Implemented, Not Run By Default)
+
+The real pipeline is implemented as separate CLIs. It is intentionally not executed by default, because the dump is tens of GB compressed and much larger extracted.
+
+### Download (with verification when possible)
+
+```bash
+.venv/bin/python -m stackdup.data.download \
+  --dataset stackoverflow \
+  --out data/raw
+```
+
+This uses Archive.org metadata to verify MD5 checksums and file sizes when the metadata provides them.
+
+### Extract
+
+```bash
+.venv/bin/python -m stackdup.data.extract \
+  --in-dir data/raw \
+  --out-dir data/extracted
+```
+
+Requires a `7z`-compatible extractor (`7zz` or `7z`) on PATH.
+
+### Build Question Store + Duplicate Edges
+
+```bash
+.venv/bin/python -m stackdup.data.build_pairs \
+  --posts data/extracted/Posts.xml \
+  --links data/extracted/PostLinks.xml \
+  --out data/processed
+```
+
+This stream-parses XML and writes `data/processed/stackoverflow.sqlite` with question text and duplicate edges.
+
+### Time Split + Retrieval Files
+
+```bash
+.venv/bin/python -m stackdup.data.split \
+  --db data/processed/stackoverflow.sqlite \
+  --out data/splits \
+  --train-end 2018-01-01 \
+  --val-end 2019-01-01
+```
+
+Outputs JSONL files (`corpus.jsonl`, `train_pairs.jsonl`, `val_pairs.jsonl`, `test_queries.jsonl`, `test_qrels.jsonl`) usable by the baseline and dual-encoder code.
+
+## Reproducibility
+
+All training/evaluation entrypoints support:
+- Fixed seeds (Python, NumPy, PyTorch).
+- Optional deterministic flags (`torch.use_deterministic_algorithms` when enabled).
+- Capturing environment metadata in `runs/.../run_meta.json`.
+
+## Notes on BM25 (Pyserini)
+
+Pyserini/Lucene indexing is the plan’s primary sparse baseline. This repo includes an optional Pyserini implementation under `stackdup/baselines/pyserini_*` which requires Java and extra dependencies; it is not installed by default to keep `make setup` robust.
+
+## License
+
+Code: MIT (see `LICENSE`).
+
+Data: Stack Overflow user contributions are CC BY-SA 4.0, distributed via the Stack Exchange Data Dump.

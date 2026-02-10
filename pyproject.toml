@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools==75.6.0", "wheel==0.43.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stackdup-dual-encoder-retrieval"
+version = "0.1.0"
+description = "Hard-negative mined dual-encoder retrieval for Stack Overflow duplicate question detection."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

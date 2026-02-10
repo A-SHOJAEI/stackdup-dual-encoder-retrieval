@@ -1,0 +1,17 @@
+dataset:
+  name: synthetic
+  out_dir: data/smoke
+  seed: 123
+  n_docs: 300
+  n_queries: 120
+  vocab_size: 200
+  dup_per_query: 1
+  hard_neg_pool: 25
+  text_style: "title_body"
+
+paths:
+  corpus: data/smoke/corpus.jsonl
+  train_pairs: data/smoke/train_pairs.jsonl
+  val_pairs: data/smoke/val_pairs.jsonl
+  test_queries: data/smoke/test_queries.jsonl
+  test_qrels: data/smoke/test_qrels.jsonl

@@ -1,0 +1,6 @@
+# Optional: plan primary baseline BM25 (Lucene) via Pyserini.
+# Notes:
+# - Requires Java.
+# - Can be heavy and sometimes sensitive to platform/Java versions.
+pyserini==0.24.0
+jnius==1.1.0

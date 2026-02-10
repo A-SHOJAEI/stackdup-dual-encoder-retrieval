@@ -1,0 +1,45 @@
+run:
+  name: smoke_biencoder_baseline
+  out_dir: runs/smoke_biencoder_baseline
+  seed: 123
+  deterministic: false
+
+data:
+  corpus: data/smoke/corpus.jsonl
+  train_pairs: data/smoke/train_pairs.jsonl
+  val_pairs: data/smoke/val_pairs.jsonl
+  test_queries: data/smoke/test_queries.jsonl
+  test_qrels: data/smoke/test_qrels.jsonl
+
+model:
+  name_or_path: "sshleifer/tiny-distilbert-base-cased"
+  max_length: 96
+  pooling: mean   # mean|cls
+  normalize: true
+
+train:
+  epochs: 1
+  batch_size: 16
+  lr: 3.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.0
+  grad_clip_norm: 1.0
+  log_every: 1
+  eval_every: 2
+  save_best: true
+  mixed_precision: false
+  temperature: 0.07
+  mined_neg_weight: 1.0
+
+mining:
+  enabled: true
+  mode: bm25   # bm25|ann
+  k: 8
+  out_file: data/smoke/mined_negatives.jsonl
+  refresh_before_training: true
+
+eval:
+  topk: [1, 5, 10, 50]
+  mrr_k: 10
+  ndcg_k: 10
+  use_faiss: true
