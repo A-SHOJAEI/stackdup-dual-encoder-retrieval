@@ -109,18 +109,18 @@ Reported metrics table (copied from `artifacts/report.md`):
 
 | name | kind | recall@1 | recall@5 | recall@10 | recall@50 | mrr@10 | ndcg@10 | n_eval |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| bm25_python | baseline | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 120.0000 |
-| tfidf_cosine | baseline | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 120.0000 |
-| smoke_biencoder_baseline | biencoder | 0.0000 | 0.0167 | 0.0500 | 0.1583 | 0.0101 | 0.0190 | 120.0000 |
-| smoke_biencoder_no_hardneg | biencoder | 0.0083 | 0.0167 | 0.0333 | 0.1917 | 0.0131 | 0.0177 | 120.0000 |
+| tfidf_cosine | baseline | 0.6667 | 1.0000 | 1.0000 | 1.0000 | 0.8229 | 0.8686 | 24 |
+| bm25_python | baseline | 0.6250 | 1.0000 | 1.0000 | 1.0000 | 0.7813 | 0.8369 | 24 |
+| smoke_biencoder_baseline | biencoder | 0.0000 | 0.0000 | 0.0000 | 0.0833 | 0.0000 | 0.0000 | 24 |
+| smoke_biencoder_no_hardneg | biencoder | 0.0417 | 0.0833 | 0.1667 | 0.2500 | 0.0622 | 0.0855 | 24 |
 
 Comparison block in `artifacts/results.json` / `artifacts/report.md`:
 - `biencoder_baseline_minus_no_hardneg` deltas:
-  - `mrr@10 = -0.0030555556`
-  - `ndcg@10 = 0.0013587881`
-  - `recall@1 = -0.0083333333`
-  - `recall@10 = 0.0166666667`
-  - `recall@50 = -0.0333333333`
+  - `mrr@10 = -0.0622`
+  - `ndcg@10 = -0.0855`
+  - `recall@1 = -0.0417`
+  - `recall@10 = -0.1667`
+  - `recall@50 = -0.1667`
 
 Interpretation constraint: these numbers are from the synthetic smoke dataset where lexical overlap is intentionally high, which is consistent with TF-IDF/BM25 scoring perfectly.
 

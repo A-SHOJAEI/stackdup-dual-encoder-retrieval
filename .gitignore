@@ -5,10 +5,10 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-data/
-indices/
-runs/
-artifacts/
+/data/
+/indices/
+/runs/
+/artifacts/
 .cache/
 
 *.pt

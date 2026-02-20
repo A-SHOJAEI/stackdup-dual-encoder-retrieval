@@ -1,0 +1,43 @@
+{
+  "project": "stackdup-dual-encoder-retrieval",
+  "config": "smoke",
+  "n_eval_queries": 24,
+  "models": {
+    "tfidf_cosine": {
+      "kind": "baseline",
+      "mrr@10": 0.8229,
+      "ndcg@10": 0.8686,
+      "recall@1": 0.6667,
+      "recall@5": 1.0,
+      "recall@10": 1.0,
+      "recall@50": 1.0
+    },
+    "bm25_python": {
+      "kind": "baseline",
+      "mrr@10": 0.7813,
+      "ndcg@10": 0.8369,
+      "recall@1": 0.6250,
+      "recall@5": 1.0,
+      "recall@10": 1.0,
+      "recall@50": 1.0
+    },
+    "biencoder_baseline": {
+      "kind": "biencoder",
+      "mrr@10": 0.0,
+      "ndcg@10": 0.0,
+      "recall@1": 0.0,
+      "recall@5": 0.0,
+      "recall@10": 0.0,
+      "recall@50": 0.0833
+    },
+    "biencoder_no_hardneg": {
+      "kind": "biencoder",
+      "mrr@10": 0.0622,
+      "ndcg@10": 0.0855,
+      "recall@1": 0.0417,
+      "recall@5": 0.0833,
+      "recall@10": 0.1667,
+      "recall@50": 0.25
+    }
+  }
+}
