@@ -16,4 +16,6 @@ __pycache__/
 *.bin
 *.safetensors
 
+*.egg-info/
+
 .DS_Store
